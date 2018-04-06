@@ -1,0 +1,26 @@
+Future work:
+
+- Keeping track of variant ctors
+- Integrating with SAT solver - Boolean struuture
+
+
+Heridily finite sets + Rats 
+https://ac.els-cdn.com/S0167642317301788/1-s2.0-S0167642317301788-main.pdf?_tid=9fa3ca91-7528-400b-ab94-8a2efd43b4fc&acdnat=1523049049_18ce07f410687584e04ea942f15cafb7
+7.5 21
+
+Talk to Stpehen about 
+* Heridily finite sets + Nats with var-sat
+* Can we get a list of constructor variants with the disequalities
+  and the ctor module
+
+Note on var-sat and countably infinite sorts
+
+Head and tail in lists undefined
+Hacked fro solvers without subsorts
+
+
+Var Sat : Initial Algebras, FVP
+https://ac-els-cdn-com.proxy2.library.illinois.edu/S2352220816301742/1-s2.0-S2352220816301742-main.pdf?_tid=9af7ed71-5a34-433a-9acd-55026dddeb63&acdnat=1523049915_94f2f839ef59ea7b34c357a4df563ec6
+
+How does Advisor Approve?
+Can there be changes after submission?
