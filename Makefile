@@ -1,3 +1,8 @@
-thesis.pdf: thesis.md thesis.tex
+thesis-readable.pdf: thesis.md easy-to-read.tex
 	export TEXINPUTS=.:$(CURDIR)/uiucthesis2014: && \
-	pandoc thesis.md -o thesis.pdf -t latex --template=thesis.tex
+	pandoc $< -o $@ -t latex --template=easy-to-read.tex
+
+thesis-formatted.pdf: thesis.md official-format.tex
+	export TEXINPUTS=.:$(CURDIR)/uiucthesis2014: && \
+	pandoc $< -o $@ -t latex --template=official-format.tex
+	

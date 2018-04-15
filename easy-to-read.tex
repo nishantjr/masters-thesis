@@ -1,0 +1,30 @@
+\documentclass[fullpage]{article}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage[margin=2cm]{geometry}
+
+%% Needed for pandoc.
+\usepackage[unicode=true]{hyperref}
+\providecommand{\tightlist}{
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\begin{document}
+
+\title{$title$}
+\author{$author$}
+
+\maketitle
+
+\tableofcontents
+
+$body$
+
+\appendix*
+
+\include{Appendix.tex}
+
+\end{document}
+\endinput
+%%
+%% End of file `thesis-ex.tex'.
