@@ -20,7 +20,7 @@ schools: University of Illinois at Urbana-Champaign
 \newcommand \F        {\mathcal F}
 \newcommand \QF       {\text{QF}}
 \newcommand \Lit      {\text{Lit}}
-\newcommand \and      {\wedge}
+\renewcommand \and      {\wedge}
 \renewcommand \And    {\bigwedge}
 
 \newcommand \sig             {\text{sig}}
@@ -32,9 +32,7 @@ schools: University of Illinois at Urbana-Champaign
 \newcommand \onetwo {\{1, 2\}}
 \newcommand \Equiv {\text{Equiv}}
 
-\begin{minipage}{0.5\textwidth}
 \tableofcontents
-\end{minipage}
 
 1. Introduction (2-3 pages)
 2. Preliminaries (3-4 pages)
@@ -45,6 +43,8 @@ schools: University of Illinois at Urbana-Champaign
 4. OS NO in Maude's Meta LEvel (5-6 pages)
 5. Examples (5) (7-pages)
 6. Conclusion 2 pages
+
+\pagebreak
 
 Introduction
 ============
@@ -190,7 +190,7 @@ In [OS Nelson-Oppen] Dr Tinelli generalizes this process to Order-Sorted theorie
 Conditions on the theories
 --------------------------
 
-For the Nelson Oppen method to be viable, the theories must beet some basic conditions.
+For the Nelson Oppen method to be viable, the theories must meet some basic conditions.
 
 Stably Infinite
 
@@ -208,6 +208,52 @@ Stably Infinite
     if for each satisfiable formule with witness $x$ of sort $s_i$, there is another
     distinct witness $y$.
 
+
+Notation: For sort $s$ and signature $\Sigma_i$, let $[s]_i$ denote it's
+connected component of sorts in $\Sigma_i$
+
+Optimally intersectable
+
+:   The order-sorted signatures $\Sigma_1$ and $\Sigma_2$ are optimally
+    intersectable iff:
+
+    1.  **Functions and predicates sorts agree:** For each
+        $f \in \fun(\Sigma_1) \intersect \fun(\Sigma_2)$ (resp,
+        $p \in \pred(\Sigma_1) \intersect \pred(\Sigma_2)$),
+        $\exists \{i, j\} \in \onetwo$ such that:
+
+        -   $F_i(f) = F_j(f) \intersect ([s_1]_i\times\cdots\times [s_m]_i) \times [s_i]$
+            (resp
+            $P_i(p) = P_j(p) \intersect ([s_1]_i\times\cdots\times [s_m]_i)$
+
+        -   $[s_l] \subset [s_l]_j, 1 \le l \le n$, and
+            $[s]_i \subset [s]_j$ (resp.
+            $[s_l]_i \subset [s_l]_j, 1 \le l \le n$).
+
+    2.  **Intersection is a single component:** For every sort
+        $s \in \SharedSorts$, we have
+        $[s]_1 \intersect S_2 = [s]_2 \intersect [s]_1 = [s]_1\intersect [s]_2$
+
+    3.  and, for any two sorts $s_i \in S_i$ and $s_j \in S_j$ any one
+        of:
+
+        i.  **Intersection is empty**:
+            $[s_i]_i \intersect [s_j]_j = \emptyset$
+
+        ii. **Intersection is the top sort of one component:**
+            $[s_i]_1 \intersect [s_j]_2 = \{s_0\}$, where $s_0$ is the
+            top-sort of atleast one of the connected components.
+
+        iii. **Once component is subsumed in the other:**
+
+             a.  $\exists k \in \onetwo$ and $[s_k]_k$ has a top sort,
+                 $[s_k]_k \subset [s_l]_l$ $\{k, l\} = \onetwo$.
+             b.  $\le_k \intersect [s_k] = \le_l \intersect [s_k]_2^2$
+             c.  (downward closure):
+                 $\forall s \in [s_l]_l, \forall s' \in [s_k]_k, s\le_l s' \implies s\in [s_k]_k$
+
+<!--
+
 Optimally Intersectable
 
 :   The order sorted signatures are *optimally intersectable*, denoting
@@ -215,7 +261,7 @@ Optimally Intersectable
     $s_i \in S_i, i \in \onetwo$. either:
 
     either:
-
+    
     1.  $[s_i]_i \intersect [s_j]_j \ne \emptyset$,
         $\{ i, j \} \subset \onetwo$ and for $k \in \{1, 2\}$, we have:
 
@@ -249,6 +295,7 @@ Optimally Intersectable
 
         * | $[s_l] \subset [s_l]_j, 1 \le l \le n$, and $[s]_i \subset [s]_j$
           | (resp. $[s_l]_i \subset [s_l]_j, 1 \le l \le n$).
+-->          
 
 Inference rules for Order-Sorted Nelson-Oppen
 ---------------------------------------------
