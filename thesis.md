@@ -12,15 +12,16 @@ schools: University of Illinois at Urbana-Champaign
 \newcommand \union      {\cup }
 \newcommand \rewrite  {\longrightarrow_R}
 \newcommand \rewrites {\longrightarrow_R}
-\newcommand \proves   {\vdash}
+\newcommand \proves   {{\vdash}}
 \newcommand \FO       {\text{FirstOrderFormula}}
 \newcommand \model    {\text{mod}}
 
 \newcommand \terms    {T_{\Sigma}}
+\newcommand \vars     {\text{vars}}
 \newcommand \F        {\mathcal F}
 \newcommand \QF       {\text{QF}}
 \newcommand \Lit      {\text{Lit}}
-\renewcommand \and      {\wedge}
+\newcommand \and      {\wedge}
 \renewcommand \And    {\bigwedge}
 
 \newcommand \sig             {\text{sig}}
@@ -33,6 +34,8 @@ schools: University of Illinois at Urbana-Champaign
 \newcommand \Equiv {\text{Equiv}}
 
 \tableofcontents
+
+Background, then Nelson-Oppen
 
 1. Introduction (2-3 pages)
 2. Preliminaries (3-4 pages)
@@ -49,21 +52,122 @@ schools: University of Illinois at Urbana-Champaign
 Introduction
 ============
 
+<!-- 
+
+> If the reason is "Maude provides good high-level language for writing
+> down mathematical algorithms", then perhaps interleaving code snippets
+> with the math makes sense (to show how they are structurally similar).
+> If you can't massage the math to the point where it looks like the
+> Maude, then maybe it's not as strong of a point. But yeah, that's the
+> biggest thing, is motivating the whole thing. The intro is a good
+> place for that. I would start by moving the SMT stuff into background,
+> and starting the Intro from scratch. Make an outline of how the whole
+> project progressed.
+>
+> 1.  We want more expressive theories in Maude. Algebra (equational
+>     fragment of FOL) is already pretty damn good, but sometimes we
+>     want more of FOL.
+> 2.  How can we make it so that fast algebraic decision procedures
+>     (unification, FVP), play nicely with the non-algebraic stuff from
+>     the rest of FOL? Answer is Nelson Oppen.
+> 3.  How can we harness all this power in Maude? Fortunately rewriting
+>     is reflective, so we can implement NO directly in Maude as a
+>     prototype, and go from there.
+>
+> Maybe even insert some contexts about automated modelling/verification
+> for the math folks as point (0). Stuff like, "Rewriting logic is a
+> formalism for building rigorous rich models of systems and doing
+> automated model checking. This approach has successfully been applied
+> to prove many properties of things ranging from biological systems
+> (cite Pathway Logic) to network protocols (cite Maude NPA/Fan's work)
+> to concensus algorithms (cite Nobi's work), to programming languages
+> (cite early K papers). The model produces are Kripke structures over
+> states which are terms in an order-sorted algebra."
+
+-->
+
+1.  Introduction (2-3 pages)
+    -   Maude is a language used for formal verification of models of systems.
+        -   Rewriting theories have Kripke structures as their models
+        -   and allow reasoning via LTL, CTL Model checkers and Reachability logic .
+        -   Low representational distance between the logic and execution semantics
+        -   Has been used for verification of lots of systems
+            -   Biological systems
+            -   Network Protocols (Maude NPA / Fan's)
+            -   Concensus algorithms (Nobi)
+            -   Programming Languages (K papers)
+        -   We can use automated theorem provers, and model checkers
+        -   Some of these proof systems are constrained by the power and expressiveness of that SMT
+            solvers have.
+    -   So you need SMT. But what is this Nelson-Oppen thing?
+        -   In Maude, we can decide SAT for vars-sat, CVC4, ... . Since `var-sat` and other solvers
+            in maude are not integrated. we cannot solve queries in that need the solver to span
+            across multiple theories.
+            -   `var-sat` handles Algebraic stuff,
+            -   CVC4 handles other FOL theories,
+            -   Congruence closure
+        -   Nelson Oppen lets us integrate them (among others) in a thoery generic manner.
+        -   Rewriting logic and hence maude is reflective, so we can write Nelson Oppen in Rewriting
+            logic itself
+2.  Background
+    -   What is SMT?
+        -   definition
+        -   Prior to nelson-oppen what was the state
+            -   Domain specific are efficient, but not flexible
+            -   Generic are flexible but not efficient
+    -   What is Equational Logic?
+        -   many- / order-sorted logics
+    -   What is Rewriting Logic?
+        -   
+    -   Maude
+        -   Meta Level
+        -   Decision Procedures we have
+            -   Variant Satisfiability
+            -   Congruence Closures
+            -   CVC4
+3.  Nelson Oppen as a rewrite theory
+    -   Conditions
+        -   Stably Infinite
+        -   Optimally intersectable
+    -   Working
+        -   Purification
+        -   Arrangements
+        -   Sketch of general idea
+        -   Convex theories are easier though
+4.  Nelson oppen as rewrite theory
+5.  Examples
+    -   Walk through Convex List + Int example in detail
+    -   Real Hereditarily Finite sets
+6.  Future direction
+    -   Expand to more than two theories
+    -   Optimize
+    -   Take advantage of constructor variants
+    -   Integrate with SAT solver
+
+Background
+==========
+
 Satisfiability modulo theories (SMT)
 ------------------------------------
 
-Given a first-order logic formula $\phi$ in the signature of a theory
-$T$ , SMT is the decision problem of deciding whether this formula is
-satisfiable. For example, the Simplex algorithm is a well-known SMT
-solver for linear arithmetic.
+Given a first-order logic formula $\phi$ with variables in the signature
+of a theory $T$, a common problem is to find an assignment that
+satisfies that formula. The decision problem for whether there is such a
+satisfying assignment is called SMT. In the case of the theory of linear
+arithmetic, this problem is called linear programming, and the Simplex
+algorithm can be used to solve SMT problems.
 
-The Nelson Oppen combination method is a fairly general methods for combining
-decision procedures for theories $T_1$ and $T_2$ into a decision procedure
-for the theory $T_1 \union T_2$.
+Several algorithms have been devised for efficiently solving SMT
+problems for different theories such as the theory of .... as well as
+general methods for free algebras modulo axioms such as associativity with
+commutativity etc. However, when working with formulae spanning multiple
+such theories, these algorithms do not compose trivially, and additional
+work must be done to prove that the procedure for solving these combined
+formula are sound.
 
-
-Preliminaries: Rewriting Logic & Maude
-======================================
+The Nelson-Oppen Combination method is a general method for combining
+procedures that work on these subtheories for fairly general subtheories for
+quantifier free formulae.
 
 Equational Logic
 ----------------
@@ -90,68 +194,101 @@ The expressiveness of Equational logic can be tuned by allowing
 signatures to carry more or less information. In *many-sorted*
 equational logic, each function symbol is also attached to a list of
 argument sorts $s_1, s_2, \ldots, s_n$, and a _result sort_.
-Thus in a many sorted equational theory, the signature is the $(S, \Sigma)$ 
+Thus, in a many sorted equational theory, the signature is the $(S, \Sigma)$ 
 where $S$ is a set of sorts, and $\Sigma$ is a set of function symbols with
 argument and result sorts in $S$. For example, a vector space would have
 sorts `Vector` and `Scalar`.
 
-Furthur, by adding a partial order $<$ on the sort symbols, we ge the more
+Furthur, by adding a partial order $<$ on the sort symbols, we get the more
 expressive order-sorted equational logic. If $s_i < s_j$ we say that $s_i$ is
-a subsort of $s_j$. For example, we could have `Integer < Rational < Real` .
+a subsort of $s_j$. For example, we could have `Integer < Rational < Real`.
 
 Rewriting Logic
 ---------------
 
-A rewrite theory $\mathcal R$ is the triple $(\Sigma, E, R)$, where $(\Sigma, E)$ is an equational theory
-and $R$ relation among the terms of that signature.
-The rewrite rules describe a relation $\rewrite \subset \terms\times \terms$. If
-$x \rewrites y$, we say "$x$ rewrites to $y$".
+A rewrite theory $\mathcal R$ is the triple $(\Sigma, E, R)$, where
+$(\Sigma, E)$ is an equational theory and $R$ the set of *one step
+rewrites* on the terms of the signature.
+The rewrite rules describe a relation $\rewrite \subset \terms\times \terms$.
+The sentences that $\mathcal R$ proves is obtained from the finite application of the following
+rules:
 
-Depending on the expressiveness of the signature $\Sigma$, we may have
-un-sorted, many-sorted and order-sorted rewriting logic theories.
+-   **Reflexitivity:** For each term $t \in \terms(X)$,
+    $$\infer{t \rewrites t} {}$$
+-   **Equality:**
+    $$\infer{ u' \rewrites v'}{ u \rewrites v & E \proves u = u' & E \proves v = v'}$$
+-   **Congruence:** For each $f : k_1 \cdots k_n \to k$ in $\Sigma$, and
+    $t_i, t_i' \in \terms(X), 1 \le i \le n$,
+    $$\infer{f(t_1,\ldots, t_n) \rewrites f(t'_1, \ldots, t'_n)}{t_1 \rewrites t'_1 & \cdots & t_n \rewrites t'_n}$$
+-   **Replacement:** For each rule $r : t \rewrites t'$ in $R$, with
+    $\vars(t) \union \vars(t') = \{x_1, \ldots x_n\}$, and for each
+    substitution,
+    $\theta : \{x_1, \ldots x_n\} \longrightarrow \terms(X)$ with
+    $\theta(x_1) = p_l$ with $\theta(x_l) = p_l, 1 \le l \le n$, then:
+    $$\infer{\theta(t) \rewrites \theta'(t')}
+            { p_1 \rewrites p'_1 & \cdots & p_n \rewrites p'_n}$$
+-   **Transitivity:**
+    $$\infer{ t_1 \rewrites t_3 } {t_1 \rewrites t_2 & t_2 \rewrites t_3 }$$
+
+If $x \rewrites y$, we say "$x$ rewrites to $y$". 
+
+[20 years of rewriting]
 
 Maude
 -----
 
-The programming language, Maude, is based on rewriting logic.
-The set of equivalence classes of terms modulo equality via $E$, $\terms/E$,
-represent the state of a program, and the rewrite rules $R$ represent
-transitions between the different states.
+The programing language, Maude, is based on rewriting logic.
+A program in Maude is a rewrite theory, and a computation is a deduction based
+on the inference rules above.
 
-The maude programming language represents programs as an aroder sorted rewrite theory over
-a term. An equational theory is described with _functional modules_.
+An equational theory is specified as a _functional modules_:
 
 ```
 fmod Z5 is
-    sorts Z5 .
-    op 0 : -> Z5 [ctor] .
-    op 1 : -> Z5 [ctor] .
+    sorts NzZ5 Z5 .
+    subsorts NzZ5 < Z5 .
 
-    op _ + _ : Z5 Z5 -> Z5 [assoc comm id 0] .
+    op 0 : -> Z5                        [ctor] .
+    op 1 : -> NzZ5                      [ctor] .
+     
+    op _ + _ : Z5 Z5 -> Z5   [assoc comm id: 0] .
     op   - _ : Z5    -> Z5 .
 
     vars x y : Z5 .
 
-    eq -(x  + y)   = -(z) + -(y) .
     eq -(x) + -(x) = 0 .
+    eq -(x  + y)   = -(z) + -(y) .
 endfm
 ```
 
-Although equations in equations in equational theories are commutative
-in the order of left and right hands, equations in maude have a prefered
-direction - the term on the left rewrites to the term on the right.
-Having a prefered direction and specifying equations like commutativity
-as attributes allow us to use equations as an operational sementics.
-i.e. use the equations to drive a terminating execution.
+This program represents an equational theory
+$E = ((S, \le_S), \Sigma, E \union B)$. Here, $S = \{$`NzZ5`$,$
+`Z5`$\}$, $\le_s = \{ ($ `NzZ5`$,$ `Z5` $\}$ and
+$\Sigma = \{ 0, 1, \_ + \_ , - \_ \}$.
+Although ordinarily equations in equational theories are symetric -- in a proof
+we may replace equals with equals if  a term matches either the left hand side
+or the right hand side -- equations in maude only apply from left to right.
 
-This mean, we need:
+This is to allow terminating execution. Some equations may also be
+specified implicitly as atrributes as associativity (`assoc`),
+commutativity (`comm`) and identity (`id: 0`) are specified above.
+Besides being convenient, it also allows specification of equations that would
+otherwise make execution non-terminating and make execution more efficient.
 
-* Confluence
+This set of attributes $E$, along with equations $B$ specified with the
+`eq` keyword together make up the equations $E \union B$ that are used
+to define an equational theory.
+
+For the theory to be well defined, we require that these equations be:
+
+* Confluent
 * functions should respect sorts (preregular??)
-* terminating
 
-Since the representational distance between maude programs and rewriting logic
-is small, it becomes easy to reason about programs written in Maude.
+[XXX expand]
+
+Defining a program as above means that there is an extremely small
+representational distance between the programs and the mathematical
+logic we use to reason about them.
 
 ### Maude Meta Level
 
@@ -174,6 +311,37 @@ will use these solvers as the subsolvers for Nelson-Oppen.
 
 #### Variant Satisfiability
 
+Variant satisisfiability is an algorithm to decide quantifier free
+satisfiability of an initial algebra $T_{\Sigma/E}$ when the equational
+theory $(\Sigma, E)$ has the finite variant property and its constructors
+satitisfy a compactness condition.
+
+Decomposition of equational theory
+:  XXX
+
+Variant
+:   Given a decomposition $\mathcal R = (\Sigma, E, R)$ of an OS equational theory
+    $(\Sigma, E)$ and a $\Sigma-$term t, a variant of $t$ is a pair $(u, \theta)$
+    such that:
+    
+    1. $u =_B (t\theta)!_{R,B}$
+    2. If $s \notin \vars(t)$ then $x\theta = x$, and
+    3. $\theta = \theta!_{R,B}$, that is, $x\theta = (x\theta)!_{R,B}$ for all
+       variables $x$.
+       
+Most General Variant
+:   Given variants $(u, \theta)$ and $(v, \gamma)$ of $t$, $(u, \theta)$ is
+    more general than $(v, \gamma)$ iff there is a substitution $\rho$ such
+    that:
+    
+    1. $\theta_\rho =+B \gamma$ and
+    2. $u\rho =_b v$
+    
+Finite Variant Property
+:   The decomposition $\mathcal R = (\Sigma, B, R)$ of $(\Sigma, E)$ has the
+    finite variant property iff for each $\Sigma-$term $t$ there is a finite
+    most general complete set of variants.
+
 * Note on var-sat and countably infinite sorts
 
 #### CVC4
@@ -194,9 +362,9 @@ For the Nelson Oppen method to be viable, the theories must meet some basic cond
 
 Stably Infinite
 
-:   Let $T$ be an order-sorted first-order theory with
-    signature $\Sigma = ((S, \le), F, P)$ and $s_1, s_2,\ldots s_n \in S$. 
-    Let $\F \subset \FO(\Sigma)$, be the set of first order formulae in $\Sigma$
+: Let $T$ be an order-sorted first-order theory with signature
+$\Sigma = ((S, \le), F, P)$ and $s_1, s_2,\ldots s_n \in S$. Let
+$\F \subset \FO(\Sigma)$, be the set of first order formulae in $\Sigma$
 
     $T$ is stably infinite in sorts $s_1, s_2,\ldots s_n$ for
     $\F-$satisfiability iff every $T-$satisfiable formula
@@ -252,6 +420,11 @@ Optimally intersectable
              c.  (downward closure):
                  $\forall s \in [s_l]_l, \forall s' \in [s_k]_k, s\le_l s' \implies s\in [s_k]_k$
 
+$$\begin{aligned}
+\text{TODO: Diagrams of allowed component intersections}
+\\ \\ \\ \\ \\ \\ \\
+\end{aligned}$$
+
 <!--
 
 Optimally Intersectable
@@ -297,34 +470,39 @@ Optimally Intersectable
           | (resp. $[s_l]_i \subset [s_l]_j, 1 \le l \le n$).
 -->          
 
+Purification
+------------
+
+Given a formula $\phi = \And \Lit(\Sigma_1 \union \Sigma_2)$ , purification
+is a transformation that gives us a formaule $\And \Lit(\Sigma_1) \and \And\Lit(\Sigma_2)$
+that is equivalent for satisfiability.
+
 Inference rules for Order-Sorted Nelson-Oppen
 ---------------------------------------------
 
-Given: $T_1, T_2$, OS-FO theories, with $\Sigma_i = \sig(T_i), i \le i \le 2$ with $\Sigma_1, \Sigma_2$
-optimally intersectable in many-sorted set of sorts $(S_0, =_{s_0})$, with $S_0 = \{ s_1, \ldots, s_n\}$
-with $T_i-$ satisfiability of quantifier free $\Sigma_i$ formulae decidable, $1 \le \le 2$.
+Given two order-sorted first-order theories, $T_1, T_2$, with signatures
+$\Sigma_1, \Sigma_2$ optimally intersectable in the set of
+sorts $S_0$, and $T_i$ satisfiability of quantifier free $\Sigma_i$ formulae
+decidable, we want a decision procedure for $T_1 \union T_2$-satisfiability
+of quantifier free $\Sigma_1 \union \Sigma_2$ formulae.
 
-We want: A decision procedure for $T_1 \union T_2$ -satisfiability
-of quantifier-free $(\Sigma_1 \union \Sigma_2)$ formulae.
-
-It is enough to have a decision procedure for formulae that are conjunctions
-of atoms in either signature
-
-Because of the formula transformations:
-
-$$                  (T_1 \union T_2, \QF(\Sigma_1 \union \Sigma_2))
-\iff{DNF}           (T_1 \union T_2, \And \Lit(T_1 \union T_2))
-\iff {purification} (T_1 \union T_2, \And \Lit(T_1) \and \And \Lit(T_2))
-$$.
+Since, we can convert any formula to disjunctive normal form, and purify
+$\Sigma_1 \union \Sigma_2$-formulae so that the are the conjunction of
+literals in each signature, we only need a decision procedure for $T_1 \union T_2$-satisfiability
+refor $\And \Lit(\Sigma_1) \and \And \Lit(\Sigma_2)$ formulae.
 
 Convex vs non-convex
 --------------------
+
 
 Inference System
 ----------------
 
 Order Sorted Nelson-Oppen in Maude's `META-LEVEL`
 ===============================================
+
+``` {include="maude/contrib/tools/meta.md/nelson-oppen-combination.md"}
+```
 
 Examples
 ========
