@@ -47,11 +47,6 @@ Background, then Nelson-Oppen
 5. Examples (5) (7-pages)
 6. Conclusion 2 pages
 
-\pagebreak
-
-Introduction
-============
-
 <!-- 
 
 > If the reason is "Maude provides good high-level language for writing
@@ -86,7 +81,7 @@ Introduction
 
 -->
 
-1.  Introduction (2-3 pages)
+1.  Introduction
     -   Maude is a language used for formal verification of models of systems.
         -   Rewriting theories have Kripke structures as their models
         -   and allow reasoning via LTL, CTL Model checkers and Reachability logic .
@@ -115,12 +110,17 @@ Introduction
         -   Prior to nelson-oppen what was the state
             -   Domain specific are efficient, but not flexible
             -   Generic are flexible but not efficient
-    -   What is Equational Logic?
-        -   many- / order-sorted logics
-    -   What is Rewriting Logic?
-        -   
-    -   Maude
-        -   Meta Level
+    -   Logical foundations of Maude
+        -   Made up of two logics, one contained in the other (pg. 10 MM)
+        -   Equational Logic
+            -   Quantifier free first-order logic
+            -   many- / order-sorted logics
+        -   What is Rewriting Logic
+            -   Kripke structures
+        -   Reflection & Meta Level
+            -   Formal Tools are actually written in the Meta Level
+                -   CRC, termination tool, real time tool ...
+                -   Rules can be non-determintistic, tools to explore state space, strategies
         -   Decision Procedures we have
             -   Variant Satisfiability
             -   Congruence Closures
@@ -132,9 +132,19 @@ Introduction
     -   Working
         -   Purification
         -   Arrangements
-        -   Sketch of general idea
-        -   Convex theories are easier though
-4.  Nelson oppen as rewrite theory
+        -   Sketch of algorithm
+            -   Given any formula, we can convert it to DNF, Purify , converting it to a conj of
+                literals in one of the two formulae
+            -   If each set of pure conjunctions are satisfiable, there is some arrangement of
+                shared variables that is satisfiable then by optimal intersectability the entire
+                fomula is satisfiable.
+            -   For a large number of variables this is difficult, so we iteratively try more and
+                more equalities until we can add no more.
+                -   In case the theory is convex, we are done
+                -   Otherwise, if PHI $\implies$ DISJ, then we check each possible equality
+
+4.  Nelson oppen as rewrite theory (fits inside this above?)
+
 5.  Examples
     -   Walk through Convex List + Int example in detail
     -   Real Hereditarily Finite sets
@@ -143,6 +153,15 @@ Introduction
     -   Optimize
     -   Take advantage of constructor variants
     -   Integrate with SAT solver
+
+\pagebreak
+
+Introduction
+===========
+
+
+
+
 
 Background
 ==========
