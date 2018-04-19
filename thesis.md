@@ -35,49 +35,31 @@ schools: University of Illinois at Urbana-Champaign
 
 \tableofcontents
 
-Background, then Nelson-Oppen
-
-1. Introduction (2-3 pages)
-2. Preliminaries (3-4 pages)
-   - Rewriting
-   - Maude
-   - MetaLevel
-3. Order Sorted Nelson Oppen as a Rewrite theory  (5-6 pages)
-4. OS NO in Maude's Meta LEvel (5-6 pages)
-5. Examples (5) (7-pages)
-6. Conclusion 2 pages
-
 <!-- 
 
-> If the reason is "Maude provides good high-level language for writing
-> down mathematical algorithms", then perhaps interleaving code snippets
-> with the math makes sense (to show how they are structurally similar).
-> If you can't massage the math to the point where it looks like the
-> Maude, then maybe it's not as strong of a point. But yeah, that's the
-> biggest thing, is motivating the whole thing. The intro is a good
-> place for that. I would start by moving the SMT stuff into background,
-> and starting the Intro from scratch. Make an outline of how the whole
-> project progressed.
+> If the reason is "Maude provides good high-level language for writing down mathematical
+> algorithms", then perhaps interleaving code snippets with the math makes sense (to show how they
+> are structurally similar). If you can't massage the math to the point where it looks like the
+> Maude, then maybe it's not as strong of a point.
 >
-> 1.  We want more expressive theories in Maude. Algebra (equational
->     fragment of FOL) is already pretty damn good, but sometimes we
->     want more of FOL.
-> 2.  How can we make it so that fast algebraic decision procedures
->     (unification, FVP), play nicely with the non-algebraic stuff from
->     the rest of FOL? Answer is Nelson Oppen.
-> 3.  How can we harness all this power in Maude? Fortunately rewriting
->     is reflective, so we can implement NO directly in Maude as a
->     prototype, and go from there.
+> But yeah, that's the biggest thing, is motivating the whole thing. The intro is a good place for
+> that. I would start by moving the SMT stuff into background, and starting the Intro from scratch.
+> Make an outline of how the whole project progressed.
 >
-> Maybe even insert some contexts about automated modelling/verification
-> for the math folks as point (0). Stuff like, "Rewriting logic is a
-> formalism for building rigorous rich models of systems and doing
-> automated model checking. This approach has successfully been applied
-> to prove many properties of things ranging from biological systems
-> (cite Pathway Logic) to network protocols (cite Maude NPA/Fan's work)
-> to concensus algorithms (cite Nobi's work), to programming languages
-> (cite early K papers). The model produces are Kripke structures over
-> states which are terms in an order-sorted algebra."
+> 1.  We want more expressive theories in Maude. Algebra (equational fragment of FOL) is already
+>     pretty damn good, but sometimes we want more of FOL.
+> 2.  How can we make it so that fast algebraic decision procedures (unification, FVP), play nicely
+>     with the non-algebraic stuff from the rest of FOL? Answer is Nelson Oppen.
+> 3.  How can we harness all this power in Maude? Fortunately rewriting is reflective, so we can
+>     implement NO directly in Maude as a prototype, and go from there.
+>
+> Maybe even insert some contexts about automated modelling/verification for the math folks as point
+> (0). Stuff like, "Rewriting logic is a formalism for building rigorous rich models of systems and
+> doing automated model checking. This approach has successfully been applied to prove many
+> properties of things ranging from biological systems (cite Pathway Logic) to network protocols
+> (cite Maude NPA/Fan's work) to concensus algorithms (cite Nobi's work), to programming languages
+> (cite early K papers). The model produces are Kripke structures over states which are terms in an
+> order-sorted algebra."
 
 -->
 
@@ -142,9 +124,7 @@ Background, then Nelson-Oppen
                 more equalities until we can add no more.
                 -   In case the theory is convex, we are done
                 -   Otherwise, if PHI $\implies$ DISJ, then we check each possible equality
-
 4.  Nelson oppen as rewrite theory (fits inside this above?)
-
 5.  Examples
     -   Walk through Convex List + Int example in detail
     -   Real Hereditarily Finite sets
@@ -158,10 +138,6 @@ Background, then Nelson-Oppen
 
 Introduction
 ===========
-
-
-
-
 
 Background
 ==========
