@@ -1,3 +1,6 @@
 [submodule "uiucthesis2014"]
 	path = uiucthesis2014
 	url = https://github.com/mayhewsw/uiucthesis2014
+[submodule "maude"]
+	path = maude
+	url = https://github.com/ehildenb/maude

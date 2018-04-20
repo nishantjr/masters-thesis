@@ -33,6 +33,9 @@ schools: University of Illinois at Urbana-Champaign
 \newcommand \onetwo {\{1, 2\}}
 \newcommand \Equiv {\text{Equiv}}
 
+% Replace phi with varphi. I find phi too similar to emptyset
+\renewcommand \phi {\varphi}
+
 \tableofcontents
 
 <!-- 
@@ -98,7 +101,7 @@ schools: University of Illinois at Urbana-Champaign
             -   Quantifier free first-order logic
             -   many- / order-sorted logics
         -   What is Rewriting Logic
-            -   Kripke structures
+            -   Models are Kripke structures
         -   Reflection & Meta Level
             -   Formal Tools are actually written in the Meta Level
                 -   CRC, termination tool, real time tool ...
@@ -110,6 +113,10 @@ schools: University of Illinois at Urbana-Champaign
 3.  Nelson Oppen as a rewrite theory
     -   Conditions
         -   Stably Infinite
+            -   Required by General Nelson Oppen
+            -   Intuitively, it means that if a formula is satisfiable and we have a witness we can
+                either produce an infinite number of witness or an infinite number of
+                counter-examples, allowing us to satisfy any disequality in addition to that formula
         -   Optimally intersectable
     -   Working
         -   Purification
