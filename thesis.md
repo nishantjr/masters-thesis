@@ -21,7 +21,7 @@ schools: University of Illinois at Urbana-Champaign
 \newcommand \F        {\mathcal F}
 \newcommand \QF       {\text{QF}}
 \newcommand \Lit      {\text{Lit}}
-\newcommand \and      {\wedge}
+\renewcommand \and      {\wedge}
 \renewcommand \And    {\bigwedge}
 
 \newcommand \sig             {\text{sig}}
@@ -33,7 +33,6 @@ schools: University of Illinois at Urbana-Champaign
 \newcommand \onetwo {\{1, 2\}}
 \newcommand \Equiv {\text{Equiv}}
 
-% Replace phi with varphi. I find phi too similar to emptyset
 \renewcommand \phi {\varphi}
 
 \tableofcontents
@@ -66,110 +65,119 @@ schools: University of Illinois at Urbana-Champaign
 
 -->
 
-1.  Introduction
-    -   Maude is a language used for formal verification of models of systems.
-        -   Rewriting theories have Kripke structures as their models
-        -   and allow reasoning via LTL, CTL Model checkers and Reachability logic .
+-   Maude is a language used for formal verification of models of systems.
+    -   Has been used for verification of lots of systems
+        -   Biological systems
+        -   Network Protocols (Maude NPA / Fan's)
+        -   Concensus algorithms (Nobi)
+        -   Programming Languages (K papers)
+    -   Programs are represented as Rewrite theories
+        -   have Kripke structures as their models
         -   Low representational distance between the logic and execution semantics
-        -   Has been used for verification of lots of systems
-            -   Biological systems
-            -   Network Protocols (Maude NPA / Fan's)
-            -   Concensus algorithms (Nobi)
-            -   Programming Languages (K papers)
-        -   We can use automated theorem provers, and model checkers
-        -   Some of these proof systems are constrained by the power and expressiveness of that SMT
-            solvers have.
-    -   So you need SMT. But what is this Nelson-Oppen thing?
-        -   In Maude, we can decide SAT for vars-sat, CVC4, ... . Since `var-sat` and other solvers
-            in maude are not integrated. we cannot solve queries in that need the solver to span
-            across multiple theories.
-            -   `var-sat` handles Algebraic stuff,
-            -   CVC4 handles other FOL theories,
-            -   Congruence closure
-        -   Nelson Oppen lets us integrate them (among others) in a thoery generic manner.
+        -   allow reasoning via LTL, CTL Model checkers and Reachability logic .
+    -   We can use automated theorem provers, and model checkers
         -   Rewriting logic and hence maude is reflective, so we can write Nelson Oppen in Rewriting
             logic itself
-2.  Background
-    -   What is SMT?
-        -   definition
-        -   Prior to nelson-oppen what was the state
-            -   Domain specific are efficient, but not flexible
-            -   Generic are flexible but not efficient
-    -   Logical foundations of Maude
-        -   Made up of two logics, one contained in the other (pg. 10 MM)
-        -   Equational Logic
-            -   Quantifier free first-order logic
-            -   many- / order-sorted logics
-        -   What is Rewriting Logic
-            -   Models are Kripke structures
-        -   Reflection & Meta Level
-            -   Formal Tools are actually written in the Meta Level
-                -   CRC, termination tool, real time tool ...
-                -   Rules can be non-determintistic, tools to explore state space, strategies
-        -   Decision Procedures we have
-            -   Variant Satisfiability
-            -   Congruence Closures
-            -   CVC4
-3.  Nelson Oppen as a rewrite theory
-    -   Conditions
-        -   Stably Infinite
-            -   Required by General Nelson Oppen
-            -   Intuitively, it means that if a formula is satisfiable and we have a witness we can
-                either produce an infinite number of witness or an infinite number of
-                counter-examples, allowing us to satisfy any disequality in addition to that formula
-        -   Optimally intersectable
-    -   Working
-        -   Purification
-        -   Arrangements
-        -   Sketch of algorithm
-            -   Given any formula, we can convert it to DNF, Purify , converting it to a conj of
-                literals in one of the two formulae
-            -   If each set of pure conjunctions are satisfiable, there is some arrangement of
-                shared variables that is satisfiable then by optimal intersectability the entire
-                fomula is satisfiable.
-            -   For a large number of variables this is difficult, so we iteratively try more and
-                more equalities until we can add no more.
-                -   In case the theory is convex, we are done
-                -   Otherwise, if PHI $\implies$ DISJ, then we check each possible equality
-4.  Nelson oppen as rewrite theory (fits inside this above?)
-5.  Examples
-    -   Walk through Convex List + Int example in detail
-    -   Real Hereditarily Finite sets
-6.  Future direction
-    -   Expand to more than two theories
-    -   Optimize
-    -   Take advantage of constructor variants
-    -   Integrate with SAT solver
+    -   Some of these tools are constrained by the power of SMT available to them
+-   Many Formal Verification tools (Model Checkers, deductive provers) rely on SMT to be effective.
+    -   Several efficient algorithms exist for some well known theories such as Linear Arithemetic,
+        real and complex arithmetic.
+    -   There are also general algorithms for SMT over algebraic theories with axioms like
+        associativity and commutativity.
+    -   However, we often need to solve SMT problems that span accross multiple such theories.
+    -   The Nelson Oppen combination method allows combining SMT solvers for theories that meet
+        fairly unassuming criteria, into a solver for the quantifier free fragment of the union of
+        these theories.
+-   So you need SMT. But what is this Nelson-Oppen thing?
+    -   When programming in Maude, there are several solvers available to us.
+    -   Some like CVC4 are external tools
+    -   Others are implemented in maude itself
+    -   These are
+        -   `var-sat` handles Algebraic stuff,
+        -   CVC4 handles other FOL theories,
+        -   Congruence closure
+    -   Although CVC4 implements nelson-oppen internally, it cannot be combined with other solvers
+        implemented in the maude `META-LEVEL`.
+    -   Since `var-sat` and other solvers in maude are not integrated. We cannot solve queries in
+        that need the solver to span across multiple theories.
+    -   Nelson Oppen lets us integrate them (among others) in a theory generic manner.
+
 
 \pagebreak
 
 Introduction
 ===========
 
+The Maude programming language is based on rewriting logic. It is often used for modeling and
+verification of systems. It has been used to verify a wide spectum of systems, from biological
+systems (Pathway Logic \cite{}), to Network Protocols (Maude NPA \cite{}), to concensus algorithms,
+and programming languages (KFramework).
+
+Maude derives its semantics from rewriting logic, and programs are represented as rewrite theories.
+This means that there is a small representational distance between rewriting logic and execution of
+programs in Maude.
+
+Kripke structures, commonly used in Model Checkers to represent the behaviour of a system, are
+models of rewrite theories. Further, Rewriting Logic, and hence Maude, is reflective allowing
+implementing in Maude algorithms that manipulate rewrite theories. This makes it a particularly easy
+target for model checkers using LTL, CTL etc, and even infinite-state model checkers like
+Reachability Logic.
+
+Many of these formal verification tools are constrained by the power of SMT solvers available to
+them. Over the years, efficient solvers have been devised for linear integer arithmetic, real and
+complex arithemetic, and also general algorithms for algebraic theories with axioms like
+associativity and commutativity. There is, however, often a need for solvers for formulae that span
+multiple theories. The Nelson Oppen combination method, published in 1979, allows combining SMT
+solvers for theories that meet some fairly unassuming criteria into a solver for the quantifier free
+fragment of the union of those theories.
+
+Maude makes a few SMT solvers available programmers. Some like CVC4 are external tools integrated
+into Maude via its C++ API. Others like `var-sat` and congruence closure are implemented in Maude
+itself, using the `META-LEVEL` to take advantage of reflection. While CVC4 does implement the
+Nelson-Oppen algorithm for combining the theories it provides, there is currently no way to combine
+it with the solvers not part of CVC4, such as those implemented at the the `META-LEVEL`.
+In this thesis, we implement the Nelson-Oppen Combination Method in Maude, and instantiate
+with it CVC4 and `var-sat`.
+
 Background
 ==========
 
-Satisfiability modulo theories (SMT)
+Satisfiability Modulo Theories (SMT)
 ------------------------------------
 
-Given a first-order logic formula $\phi$ with variables in the signature
-of a theory $T$, a common problem is to find an assignment that
-satisfies that formula. The decision problem for whether there is such a
-satisfying assignment is called SMT. In the case of the theory of linear
-arithmetic, this problem is called linear programming, and the Simplex
-algorithm can be used to solve SMT problems.
+Given a first-order logic formula $\phi$ with variables in the signature of a theory $T$, a common
+problem is to find an assignment of variables for which the formula evaluate to true. The decision
+problem for checking whether such a satisfying assignment exists is called Satisfiability Modulo
+Theories (SMT). In the case of the theory of linear arithmetic, this problem is called linear
+programming, and the Simplex algorithm is a well-known algorithm for solving linear programming SMT
+problems.
 
-Several algorithms have been devised for efficiently solving SMT
-problems for different theories such as the theory of .... as well as
-general methods for free algebras modulo axioms such as associativity with
-commutativity etc. However, when working with formulae spanning multiple
-such theories, these algorithms do not compose trivially, and additional
-work must be done to prove that the procedure for solving these combined
-formula are sound.
+Several algorithms have been devised for efficiently solving SMT problems for different theories, as
+well as general methods for free algebras modulo axioms such as associativity with commutativity
+etc.
 
-The Nelson-Oppen Combination method is a general method for combining
-procedures that work on these subtheories for fairly general subtheories for
-quantifier free formulae.
+However, when working with formulae spanning multiple such theories, these algorithms may not
+compose trivially, and additional work must be done to prove that the procedure for solving these
+combined formula are sound. Further, even if a general algorithm works for a specific theory, there
+may be more efficient algorithms for solving that problem.
+
+In 1979, Nelson and Oppen published the first general algorithm for deciding the satisfiability of
+formulae in the union of two theories, provided they meet two conditions:
+
+1.  The theories are "stably infinite"
+2.  Their signatures are disjoint.
+
+Later, in \cite{},  Tinelli generalized this algorithm and formalised it for order-sorted logic,
+which Maude implements. 
+
+Logical Foundations of Maude
+============================
+
+Maude is based on two logics, one contained in the other. 
+
+The first, equational logic, is the quantifier free fragment of first-order logic with equality. The
+second, rewriting logic, is defined by transitions between equivalence classes of terms defined by
+an equational theory.
 
 Equational Logic
 ----------------
@@ -201,7 +209,7 @@ where $S$ is a set of sorts, and $\Sigma$ is a set of function symbols with
 argument and result sorts in $S$. For example, a vector space would have
 sorts `Vector` and `Scalar`.
 
-Furthur, by adding a partial order $<$ on the sort symbols, we get the more
+Further, by adding a partial order $<$ on the sort symbols, we get the more
 expressive order-sorted equational logic. If $s_i < s_j$ we say that $s_i$ is
 a subsort of $s_j$. For example, we could have `Integer < Rational < Real`.
 
@@ -233,6 +241,24 @@ rules:
     $$\infer{ t_1 \rewrites t_3 } {t_1 \rewrites t_2 & t_2 \rewrites t_3 }$$
 
 If $x \rewrites y$, we say "$x$ rewrites to $y$". 
+
+<!--
+
+    -   What is Rewriting Logic
+        -   Models are Kripke structures
+    -   Reflection & Meta Level
+        -   Formal Tools are actually written in the Meta Level
+            -   CRC, termination tool, real time tool ...
+            -   Rules can be non-determintistic, tools to explore state space, strategies
+    -   Decision Procedures we have
+        -   Variant Satisfiability
+        -   Congruence Closures
+        -   CVC4
+
+-->
+
+Models of rewrite theories are Kripke structure. Kripke structures are
+
 
 [20 years of rewriting]
 
@@ -351,11 +377,40 @@ Finite Variant Property
 Order Sorted Nelson Oppen as a rewrite theory
 =============================================
 
-Given decision procedures for the satisfiablilty of two theories,
-meeting certain conditions,  the Nelson-Oppen Combination algorithm
-derives an algorithm for the satisfiablilty of the union of these theories.
+<!--
 
-In [OS Nelson-Oppen] Dr Tinelli generalizes this process to Order-Sorted theories.
+3.  Nelson Oppen as a rewrite theory
+    -   Conditions
+        -   Stably Infinite
+            -   Required by General Nelson Oppen
+            -   Intuitively, it means that if a formula is satisfiable and we have a witness we can
+                either produce an infinite number of witness or an infinite number of
+                counter-examples, allowing us to satisfy any disequality in addition to that formula
+        -   Optimally intersectable
+    -   Working
+        -   Purification
+        -   Arrangements
+        -   Sketch of algorithm
+            -   Given any formula, we can convert it to DNF, Purify , converting it to a conj of
+                literals in one of the two formulae
+            -   If each set of pure conjunctions are satisfiable, there is some arrangement of
+                shared variables that is satisfiable then by optimal intersectability the entire
+                fomula is satisfiable.
+            -   For a large number of variables this is difficult, so we iteratively try more and
+                more equalities until we can add no more.
+                -   In case the theory is convex, we are done
+                -   Otherwise, if PHI $\implies$ DISJ, then we check each possible equality
+4.  Nelson oppen as rewrite theory (fits inside this above?)
+5.  Examples
+    -   Walk through Convex List + Int example in detail
+    -   Real Hereditarily Finite sets
+6.  Future direction
+    -   Expand to more than two theories
+    -   Optimize
+    -   Take advantage of constructor variants
+    -   Integrate with SAT solver
+
+-->
 
 Conditions on the theories
 --------------------------
@@ -364,19 +419,17 @@ For the Nelson Oppen method to be viable, the theories must meet some basic cond
 
 Stably Infinite
 
-: Let $T$ be an order-sorted first-order theory with signature
-$\Sigma = ((S, \le), F, P)$ and $s_1, s_2,\ldots s_n \in S$. Let
-$\F \subset \FO(\Sigma)$, be the set of first order formulae in $\Sigma$
+:   Let $T$ be an order-sorted first-order theory with signature $\Sigma = ((S, \le), F, P)$ and
+    $s_1, s_2,\ldots s_n \in S$. Let $\F \subset \FO(\Sigma)$, be the set of first order formulae in
+    $\Sigma$
 
-    $T$ is stably infinite in sorts $s_1, s_2,\ldots s_n$ for
-    $\F-$satisfiability iff every $T-$satisfiable formula
-    $\phi \in \F$, is also satisfiable in a model
-    $\mathcal B = (B, \__B) \in \model(T)$ such that
-    $|B_{s_i}| \ge \chi_0, 1 \le i \le n$.
+    $T$ is stably infinite in sorts $s_1, s_2,\ldots s_n$ for $\F-$satisfiability iff every
+    $T-$satisfiable formula $\phi \in \F$, is also satisfiable in a model
+    $\mathcal B = (B, \__B) \in \model(T)$ such that $|B_{s_i}| \ge \chi_0, 1 \le i \le n$.
 
-    Intuitively, a theory is stably finite if for each sort $s_i$,
-    if for each satisfiable formule with witness $x$ of sort $s_i$, there is another
-    distinct witness $y$.
+    Intuitively, it means that if a formula is satisfiable and we have a witness we can either
+    produce an infinite number of witness or an infinite number of counter-examples, allowing us to
+    satisfy any disequality in addition to that formula
 
 
 Notation: For sort $s$ and signature $\Sigma_i$, let $[s]_i$ denote it's
