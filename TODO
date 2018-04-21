@@ -1,0 +1,18 @@
+1. heridarily finite sets
+2. Other examples
+3. Relate code to the inference system
+
+3. Example with Yices
+4. How reflection lifts terms to the meta level
+
+3. Before examples describe interface
+   - How formulae at the object level lifts to meta level
+2. Introduction and Conclusion last
+    - Sorts reduces number of variables
+    - Why order sorted nelson oppen is needed
+        - Tinelli is not standard
+        - more advances in 576
+            - Handle subsorts
+            - procs in Different tools
+            - User Definable theories (var-sat)
+        - representaional distance between inference rules and rewrite rules
