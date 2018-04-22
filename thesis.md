@@ -21,7 +21,7 @@ schools: University of Illinois at Urbana-Champaign
 \newcommand \F        {\mathcal F}
 \newcommand \QF       {\text{QF}}
 \newcommand \Lit      {\text{Lit}}
-\renewcommand \and      {\wedge}
+\newcommand \and      {\wedge }
 \renewcommand \And    {\bigwedge}
 
 \newcommand \sig             {\text{sig}}
@@ -63,8 +63,6 @@ schools: University of Illinois at Urbana-Champaign
 > (cite early K papers). The model produces are Kripke structures over states which are terms in an
 > order-sorted algebra."
 
--->
-
 -   Maude is a language used for formal verification of models of systems.
     -   Has been used for verification of lots of systems
         -   Biological systems
@@ -102,6 +100,7 @@ schools: University of Illinois at Urbana-Champaign
         that need the solver to span across multiple theories.
     -   Nelson Oppen lets us integrate them (among others) in a theory generic manner.
 
+-->
 
 \pagebreak
 
@@ -109,7 +108,7 @@ Introduction
 ===========
 
 The Maude programming language is based on rewriting logic. It is often used for modeling and
-verification of systems. It has been used to verify a wide spectum of systems, from biological
+verification of systems. It has been used to verify a wide spectrum of systems, from biological
 systems (Pathway Logic \cite{}), to Network Protocols (Maude NPA \cite{}), to concensus algorithms,
 and programming languages (KFramework).
 
@@ -120,12 +119,12 @@ programs in Maude.
 Kripke structures, commonly used in Model Checkers to represent the behaviour of a system, are
 models of rewrite theories. Further, Rewriting Logic, and hence Maude, is reflective allowing
 implementing in Maude algorithms that manipulate rewrite theories. This makes it a particularly easy
-target for model checkers using LTL, CTL etc, and even infinite-state model checkers like
-Reachability Logic.
+target for model checkers using LTL, CTL etc, and even automated theorem provers like Reachability
+Logic.
 
 Many of these formal verification tools are constrained by the power of SMT solvers available to
 them. Over the years, efficient solvers have been devised for linear integer arithmetic, real and
-complex arithemetic, and also general algorithms for algebraic theories with axioms like
+complex arithmetic, and also general algorithms for algebraic theories with axioms like
 associativity and commutativity. There is, however, often a need for solvers for formulae that span
 multiple theories. The Nelson Oppen combination method, published in 1979, allows combining SMT
 solvers for theories that meet some fairly unassuming criteria into a solver for the quantifier free
@@ -374,12 +373,19 @@ Finite Variant Property
 
 #### CVC4
 
+-   Sets (non-recursive) of Ints, Reals, etc
+-   Algebraic data types (axioms list `comm, assoc` not allowed)
+-   Linear real , subset of non-linear that can be converted to linear.
+
 Order Sorted Nelson Oppen as a rewrite theory
 =============================================
 
 <!--
 
 3.  Nelson Oppen as a rewrite theory
+    - Order sorted is nicer that many-sorted and unsorted, because we omit
+      arrangements where there are equalities that are obviously unsatisfaible
+      at the sort level.
     -   Conditions
         -   Stably Infinite
             -   Required by General Nelson Oppen
@@ -480,53 +486,28 @@ $$\begin{aligned}
 \\ \\ \\ \\ \\ \\ \\
 \end{aligned}$$
 
-<!--
 
-Optimally Intersectable
+High Level Overview
+-------------------
 
-:   The order sorted signatures are *optimally intersectable*, denoting
-    as $[s_i]_i$ as the connected component $(S_i, \le_i)$ of a sort
-    $s_i \in S_i, i \in \onetwo$. either:
+For $n$ theories $T_i$, we have the following:
 
-    either:
-    
-    1.  $[s_i]_i \intersect [s_j]_j \ne \emptyset$,
-        $\{ i, j \} \subset \onetwo$ and for $k \in \{1, 2\}$, we have:
+Given a first order formula $\phi \in \FO(\Sigma_1 \union \ldots \union \Sigma_n)$, we can transform
+it into it's disjunctive normal form (DNF) $\And \Lit(\Sigma_1\union\cdots\union\Sigma_n)$ that is
+equisatisfiable.
 
-        a.  $\exists k \in \onetwo$ and $[s_k]_k$ has a top sort,
-            $[s_k]_k \subset [s_l]_l$ $\{k, l\} = \onetwo$.
-        b.  $\le_k \intersect [s_k] = \le_l \intersect [s_k]_2^2$
-        c.  (downward closure):
-            $\forall s \in [s_l]_l, \forall s' \in [s_k]_k, s\le_l s' \implies s\in [s_k]_k$
-        d.  (uniqueness):
-            $[s_i]_i \intersect S_j = [s_j]_j \intersect S_i = [s_k]_k$
+Similarly, for each atom in the disjunction $t = t'$, where $t$ and $t'$ are in the union of the
+signatures, we can can convert it into a formula
+$\And \Lit(\Sigma_1) \and \cdots \and \And \Lit(\Sigma_n)$ preserving satisfiability.
 
-    2.  $[s_i]_i \intersect [s_j]_j = \{ s_0 \}, \{i, j\} = \onetwo$,
-        and $\exists k \in \onetwo$ such that $s_0$ is the top element
-        of $[s_k]_k$
+For example, we can replace the atom $t(\ldots, u(\ldots), \ldots) = t'$
+with the conjunction $t(\ldots, x, \ldots) = t' \and x = u(\ldots)$, where $t$
+and $u$ are function symbols in different signatures.
 
-        (uniqueness):
-        $[s_i]_i \intersect S_j = [s_j]_j \intersect S_i = [s_k]_k$
+Now, since we have stable infiniteness, two variables are required to be in the same equivalence
+class in an arrangement iff atleast one of the theories requires it.        
 
-    and:
-
-    -   If $f \in \fun(\Sigma_1) \intersect \fun(\Sigma_2)$
-        (resp, $p \in \pred(\Sigma_1) \intersect \pred(\Sigma_2)$
-        then $\exists \{i, j\} \in \onetwo$ such that:
-
-        if $(s_1,\ldots, s_n, s) \in F_i(f)$
-        (resp. $(s_1, \ldots, s_n) \in P_i(p)$
-        then:
-
-        * | $F_i(f) = F_j(f) \intersect ([s_1]_i\times\cdots\times [s_m]_i) \times [s_i]$
-          | (resp $P_i(p) = P_j(p) \intersect ([s_1]_i\times\cdots\times [s_m]_i)$
-
-        * | $[s_l] \subset [s_l]_j, 1 \le l \le n$, and $[s]_i \subset [s]_j$
-          | (resp. $[s_l]_i \subset [s_l]_j, 1 \le l \le n$).
--->          
-
-Purification
-------------
+### Purification
 
 Given a formula $\phi = \And \Lit(\Sigma_1 \union \Sigma_2)$ , purification
 is a transformation that gives us a formaule $\And \Lit(\Sigma_1) \and \And\Lit(\Sigma_2)$
@@ -549,15 +530,9 @@ refor $\And \Lit(\Sigma_1) \and \And \Lit(\Sigma_2)$ formulae.
 Convex vs non-convex
 --------------------
 
-
-Inference System
-----------------
-
 Order Sorted Nelson-Oppen in Maude's `META-LEVEL`
 ===============================================
 
-``` {include="maude/contrib/tools/meta.md/nelson-oppen-combination.md"}
-```
 
 Examples
 ========
