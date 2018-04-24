@@ -21,12 +21,17 @@ schools: University of Illinois at Urbana-Champaign
 \newcommand \F        {\mathcal F}
 \newcommand \QF       {\text{QF}}
 \newcommand \Lit      {\text{Lit}}
-\newcommand \and      {\wedge }
+\renewcommand \lor     {\vee }
+\newcommand \Or     {\bigvee}
 \renewcommand \And    {\bigwedge}
+\newcommand \limplies {\longrightarrow }
 
 \newcommand \sig             {\text{sig}}
 \newcommand \fun             {\text{fun}}
 \newcommand \pred            {\text{pred}}
+
+\newcommand \purified        {\text{xxxpurified}}
+\newcommand \arrangements    {\text{xxxarrangements}}
 
 \newcommand \SharedSorts     {S_0}
 \newcommand \SharedVariables {X^{1, 2}}
@@ -35,7 +40,9 @@ schools: University of Illinois at Urbana-Champaign
 
 \renewcommand \phi {\varphi}
 
-\tableofcontents
+\newcommand \NelsonOppenSat {\text{NelsonOppenSat}} 
+\newcommand \CheckSat       {\text{CheckSat}} 
+\newcommand \CandidateEqualities {\text{CE}} 
 
 <!-- 
 
@@ -421,7 +428,10 @@ Order Sorted Nelson Oppen as a rewrite theory
 Conditions on the theories
 --------------------------
 
-For the Nelson Oppen method to be viable, the theories must meet some basic conditions.
+For the Nelson Oppen method to be viable, the theories must meet some conditions.
+
+2. They must be stably infinite
+3. They must be optimally intersecting.
 
 Stably Infinite
 
@@ -459,6 +469,10 @@ Optimally intersectable
             $[s]_i \subset [s]_j$ (resp.
             $[s_l]_i \subset [s_l]_j, 1 \le l \le n$).
 
+        XXX requirement that no common function and predicate symbols removed?
+        What guarantees that functions and predicates are the same when restricted
+        to the intersection?
+
     2.  **Intersection is a single component:** For every sort
         $s \in \SharedSorts$, we have
         $[s]_1 \intersect S_2 = [s]_2 \intersect [s]_1 = [s]_1\intersect [s]_2$
@@ -481,64 +495,101 @@ Optimally intersectable
              c.  (downward closure):
                  $\forall s \in [s_l]_l, \forall s' \in [s_k]_k, s\le_l s' \implies s\in [s_k]_k$
 
+\begin{figure}
 $$\begin{aligned}
-\text{TODO: Diagrams of allowed component intersections}
 \\ \\ \\ \\ \\ \\ \\
 \end{aligned}$$
+\caption{XXX: Diagrams of allowed component intersections}
+\end{figure}
 
 
-High Level Overview
--------------------
+Overview
+--------
 
-For $n$ theories $T_i$, we have the following:
+Given two order-sorted, optimally intersecting, stably-infinite theories $T_1$ and $T_2$ with
+signatures $\Sigma_1$ and $\Sigma_2$ each with decision procedures for quantifier free
+$T_i$-satisfiability we want to derive a decision procedure for quantifier free $T_1 \union T_2$
+satisfiability.
 
-Given a first order formula $\phi \in \FO(\Sigma_1 \union \ldots \union \Sigma_n)$, we can transform
-it into it's disjunctive normal form (DNF) $\And \Lit(\Sigma_1\union\cdots\union\Sigma_n)$ that is
-equisatisfiable.
+We can transform any formula $\phi$ into an *equi-satisfiable* formula in disjunctive normal form.
+Furthur, for each atom in such a formula we can apply "purification" to obtain a formula with each
+atom in the signature of one of the theories.
 
-Similarly, for each atom in the disjunction $t = t'$, where $t$ and $t'$ are in the union of the
-signatures, we can can convert it into a formula
-$\And \Lit(\Sigma_1) \and \cdots \and \And \Lit(\Sigma_n)$ preserving satisfiability.
+Now, our task has become to find a model $M_0$ and an assigment $a: \vars(\phi) \to M_0$ such that
+$M_0, a \models \purified$. In general, this requires knowing thde semantics of each of the
+theories, but in the case of stably infinite theories, the task is easier. With stably infiniteness,
+since every satisfiable formula has an infinite model, if we need a value distinct from a witness we
+have infinite choices for either the value or the witness. i.e.
+$$T_1 \union T_2 \not\models \phi \land \vec t_k \ne \vec t'_k 
+\iff T_i \models \phi \limplies \vec t_k = \vec t'_k$$
+This means that we do not need to find a specific arrangement, but just a satisfiable equivalence
+relation of the shared variables. For any formula, $\purified$, we have an equisatisfiable formula
+$\arrangements$. Since for stably infinite theories we only care about the equivalence class being
+satisfiable, we can project this formula onto each of the theories and check satisfiability.
 
-For example, we can replace the atom $t(\ldots, u(\ldots), \ldots) = t'$
-with the conjunction $t(\ldots, x, \ldots) = t' \and x = u(\ldots)$, where $t$
-and $u$ are function symbols in different signatures.
-
-Now, since we have stable infiniteness, two variables are required to be in the same equivalence
-class in an arrangement iff atleast one of the theories requires it.        
-
-### Purification
-
-Given a formula $\phi = \And \Lit(\Sigma_1 \union \Sigma_2)$ , purification
-is a transformation that gives us a formaule $\And \Lit(\Sigma_1) \and \And\Lit(\Sigma_2)$
-that is equivalent for satisfiability.
+\begin{figure}
+$$\begin{matrix*}[l]
+                    &    &                        &     & T_{\union}  \models& \QF(\Sigma_1 \union \sigma_2)                                              \\
+\text{DNF}          &\iff&                        &     & T_{\union}  \models& \And \Lit(\Sigma_1 \union \sigma_2)                                        \\
+\text{Purification} &\iff&                        &     & T_{\union}  \models& \And \Lit(\Sigma_1) \land \And\Lit(\sigma_2)                                \\
+\text{Arrangement}  &\iff&                        &     & T_{\union}  \models& \Or ( \And \Lit(\Sigma_1) \land \And\Lit(\sigma_2) \land \And \phi_{\equiv} )\\
+\text{Projection}   &\iff& \exists \phi_{\equiv}, &     & T_1 \models        & \And \Lit(\Sigma_1) \land \And \phi_{\equiv}                                \\
+                    &    &                        &\text{and} & T_2 \models        & \And \Lit(\Sigma_2) \land \And \phi_{\equiv}
+\end{matrix*}$$
+\caption{Equisatisfiable formulae transformations on stably infinite theories we use for NO}
+\end{figure}
 
 Inference rules for Order-Sorted Nelson-Oppen
 ---------------------------------------------
 
-Given two order-sorted first-order theories, $T_1, T_2$, with signatures
-$\Sigma_1, \Sigma_2$ optimally intersectable in the set of
-sorts $S_0$, and $T_i$ satisfiability of quantifier free $\Sigma_i$ formulae
-decidable, we want a decision procedure for $T_1 \union T_2$-satisfiability
-of quantifier free $\Sigma_1 \union \Sigma_2$ formulae.
+Note that up to this point, we have only found a mathematically sound way of finding satisfiability
+but do not yet have a viable efficient algorithm.
+Checking each equivalence class for satisfiability is infeasable (for 12 variables there as as many
+as xxx), even in the order sorted case where we can restrict ourselves to equivalences capatable
+with the sort structure.
 
-Since, we can convert any formula to disjunctive normal form, and purify
-$\Sigma_1 \union \Sigma_2$-formulae so that the are the conjunction of
-literals in each signature, we only need a decision procedure for $T_1 \union T_2$-satisfiability
-refor $\And \Lit(\Sigma_1) \and \And \Lit(\Sigma_2)$ formulae.
+Instead we choose a darwainian approach, pruning classes of equivalences from the search space if
+an identification of a single pair of variables implied by one theory is not satisfiable in another.
+For the non-convex case, if any theory implies the disjunction of all remaining identifications
+we branch our search, checking if atleast one of the remaining identifications is satisfiable.
 
-Convex vs non-convex
---------------------
+$$\infer[\text{Equality Propagation}]
+  { \begin{matrix*}[l]
+          & \CheckSat(\phi_j \land \phi_E \land x_m = x_n) \\
+    \land & \NelsonOppenSat(\phi_1 \land \phi_2 \land \phi_E, \CandidateEqualities \setminus \{x_m = x_n\})
+    \end{matrix*}
+  }
+  { x_m = x_n \in \CandidateEqualities
+  & T_i \models \phi_i \and \phi_E \implies x_m = x_n
+  & \NelsonOppenSat(\phi_1 \land \phi_2 \land \phi_E, \CandidateEqualities)
+  }
+$$
 
-Order Sorted Nelson-Oppen in Maude's `META-LEVEL`
-===============================================
+$$\infer[\text{Split}]
+  {\Or_{x_m = x_n \in \CandidateEqualities}
+   \left(\begin{matrix*}[l]
+        &      &\CheckSat(\phi_1 \land \phi_E \land x_m = x_n) \\
+        &\land & \CheckSat(\phi_2 \land \phi_E \land x_m = x_n) \\
+        &\land & \NelsonOppenSat(\phi_1 \land \phi_2 \land \phi_E, \CandidateEqualities \setminus \{x_m = x_n\})
+   \end{matrix*}\right)
+  }
+  { 
+  & T_i \models \phi_i \and \phi_E \implies \And \CandidateEqualities
+  & \NelsonOppenSat(\phi_1 \land \phi_2 \land \phi_E, \CandidateEqualities)
+  }
+$$
 
+\input{algorithm.tex}
 
 Examples
 ========
 
 * List + Rat example
-* Hereditarily finite sets + Rats
+
+Hereditarily Finite Sets parameterized over rationals
+-----------------------------------------------------
+
+\input{hfs.tex}
 
 https://ac.els-cdn.com/S0167642317301788/1-s2.0-S0167642317301788-main.pdf?_tid=9fa3ca91-7528-400b-ab94-8a2efd43b4fc&acdnat=1523049049_18ce07f410687584e04ea942f15cafb7
 7.5 21
@@ -548,4 +599,5 @@ Conclusion & Future work
 
 -   Keeping track of variant ctors
 -   Integrating with SAT solver - Boolean struture
-
+-   Shiney and Polite theories
+    - bit vectors
