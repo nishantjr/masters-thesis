@@ -1,11 +1,13 @@
 ---
-title: "Nelson-Oppen Combination in Maude"
+title: "Order-Sorted Nelson-Oppen Combination in Rewriting Logic"
 author: Nishant Rodrigues
-advisor: Dr. Jose Mesegeur
+advisor: Dr. Jose Meseguer
 year: 2018
 department: Mathematics
 schools: University of Illinois at Urbana-Champaign
 ---
+
+\newcommand \braces[1] {\{ #1 \}}
 
 \newcommand \Z        {\mathbb Z}
 \newcommand \intersect  {\cap }
@@ -30,8 +32,8 @@ schools: University of Illinois at Urbana-Champaign
 \newcommand \fun             {\text{fun}}
 \newcommand \pred            {\text{pred}}
 
-\newcommand \purified        {\text{xxxpurified}}
-\newcommand \arrangements    {\text{xxxarrangements}}
+\newcommand \purified        {\And\Lit(\Sigma_1) \land \And\Lit(\Sigma_2) \land \Lit(\Sigma_0)}
+\newcommand \arrangements    {\Or\{\ \}}
 
 \newcommand \SharedSorts     {S_0}
 \newcommand \SharedVariables {X^{1, 2}}
@@ -44,71 +46,6 @@ schools: University of Illinois at Urbana-Champaign
 \newcommand \CheckSat       {\text{CheckSat}} 
 \newcommand \CandidateEqualities {\text{CE}} 
 
-<!-- 
-
-> If the reason is "Maude provides good high-level language for writing down mathematical
-> algorithms", then perhaps interleaving code snippets with the math makes sense (to show how they
-> are structurally similar). If you can't massage the math to the point where it looks like the
-> Maude, then maybe it's not as strong of a point.
->
-> But yeah, that's the biggest thing, is motivating the whole thing. The intro is a good place for
-> that. I would start by moving the SMT stuff into background, and starting the Intro from scratch.
-> Make an outline of how the whole project progressed.
->
-> 1.  We want more expressive theories in Maude. Algebra (equational fragment of FOL) is already
->     pretty damn good, but sometimes we want more of FOL.
-> 2.  How can we make it so that fast algebraic decision procedures (unification, FVP), play nicely
->     with the non-algebraic stuff from the rest of FOL? Answer is Nelson Oppen.
-> 3.  How can we harness all this power in Maude? Fortunately rewriting is reflective, so we can
->     implement NO directly in Maude as a prototype, and go from there.
->
-> Maybe even insert some contexts about automated modelling/verification for the math folks as point
-> (0). Stuff like, "Rewriting logic is a formalism for building rigorous rich models of systems and
-> doing automated model checking. This approach has successfully been applied to prove many
-> properties of things ranging from biological systems (cite Pathway Logic) to network protocols
-> (cite Maude NPA/Fan's work) to concensus algorithms (cite Nobi's work), to programming languages
-> (cite early K papers). The model produces are Kripke structures over states which are terms in an
-> order-sorted algebra."
-
--   Maude is a language used for formal verification of models of systems.
-    -   Has been used for verification of lots of systems
-        -   Biological systems
-        -   Network Protocols (Maude NPA / Fan's)
-        -   Concensus algorithms (Nobi)
-        -   Programming Languages (K papers)
-    -   Programs are represented as Rewrite theories
-        -   have Kripke structures as their models
-        -   Low representational distance between the logic and execution semantics
-        -   allow reasoning via LTL, CTL Model checkers and Reachability logic .
-    -   We can use automated theorem provers, and model checkers
-        -   Rewriting logic and hence maude is reflective, so we can write Nelson Oppen in Rewriting
-            logic itself
-    -   Some of these tools are constrained by the power of SMT available to them
--   Many Formal Verification tools (Model Checkers, deductive provers) rely on SMT to be effective.
-    -   Several efficient algorithms exist for some well known theories such as Linear Arithemetic,
-        real and complex arithmetic.
-    -   There are also general algorithms for SMT over algebraic theories with axioms like
-        associativity and commutativity.
-    -   However, we often need to solve SMT problems that span accross multiple such theories.
-    -   The Nelson Oppen combination method allows combining SMT solvers for theories that meet
-        fairly unassuming criteria, into a solver for the quantifier free fragment of the union of
-        these theories.
--   So you need SMT. But what is this Nelson-Oppen thing?
-    -   When programming in Maude, there are several solvers available to us.
-    -   Some like CVC4 are external tools
-    -   Others are implemented in maude itself
-    -   These are
-        -   `var-sat` handles Algebraic stuff,
-        -   CVC4 handles other FOL theories,
-        -   Congruence closure
-    -   Although CVC4 implements nelson-oppen internally, it cannot be combined with other solvers
-        implemented in the maude `META-LEVEL`.
-    -   Since `var-sat` and other solvers in maude are not integrated. We cannot solve queries in
-        that need the solver to span across multiple theories.
-    -   Nelson Oppen lets us integrate them (among others) in a theory generic manner.
-
--->
-
 \pagebreak
 
 Introduction
@@ -116,8 +53,8 @@ Introduction
 
 The Maude programming language is based on rewriting logic. It is often used for modeling and
 verification of systems. It has been used to verify a wide spectrum of systems, from biological
-systems (Pathway Logic \cite{}), to Network Protocols (Maude NPA \cite{}), to concensus algorithms,
-and programming languages (KFramework).
+systems (Pathway Logic [@pathwaylogic]), to Network Protocols (Maude NPA [@NPA]), to concensus algorithms,
+and programming languages (KFramework [@kmaude]).
 
 Maude derives its semantics from rewriting logic, and programs are represented as rewrite theories.
 This means that there is a small representational distance between rewriting logic and execution of
@@ -167,23 +104,24 @@ compose trivially, and additional work must be done to prove that the procedure 
 combined formula are sound. Further, even if a general algorithm works for a specific theory, there
 may be more efficient algorithms for solving that problem.
 
-In 1979, Nelson and Oppen published the first general algorithm for deciding the satisfiability of
+In [@nelsonoppen], the first general algorithm for deciding the satisfiability of
 formulae in the union of two theories, provided they meet two conditions:
 
 1.  The theories are "stably infinite"
 2.  Their signatures are disjoint.
 
-Later, in \cite{},  Tinelli generalized this algorithm and formalised it for order-sorted logic,
-which Maude implements. 
+Later, in [@tinelliordersorted], this algorithm was generalized and formalized for order-sorted
+logics. This was further refined and concretized in [@cs576] into a
+system of inference rules.
 
 Logical Foundations of Maude
 ============================
 
 Maude is based on two logics, one contained in the other. 
 
-The first, equational logic, is the quantifier free fragment of first-order logic with equality. The
-second, rewriting logic, is defined by transitions between equivalence classes of terms defined by
-an equational theory.
+The first, equational logic, is the Horn logic fragment of first-order logic with equality for
+signatures involving only function symbols. The second, rewriting logic, is defined by transitions
+between equivalence classes of terms defined by an equational theory.
 
 Equational Logic
 ----------------
@@ -206,10 +144,10 @@ x + (-x)                  &= 0           &\quad\quad& \text{Inverses}           
 (1 + (1 + (1 + (1 + 1)))) &= 0           &\quad\quad& \text{Modulo 5}            \\
 \end{aligned}$$
 
-The expressiveness of Equational logic can be tuned by allowing
+The expressiveness of Equational Logic can be tuned by allowing
 signatures to carry more or less information. In *many-sorted*
 equational logic, each function symbol is also attached to a list of
-argument sorts $s_1, s_2, \ldots, s_n$, and a _result sort_.
+_argument sorts_ $s_1, s_2, \ldots, s_n$, and a _result sort_ $s$.
 Thus, in a many sorted equational theory, the signature is the $(S, \Sigma)$ 
 where $S$ is a set of sorts, and $\Sigma$ is a set of function symbols with
 argument and result sorts in $S$. For example, a vector space would have
@@ -226,7 +164,7 @@ A rewrite theory $\mathcal R$ is the triple $(\Sigma, E, R)$, where
 $(\Sigma, E)$ is an equational theory and $R$ the set of *one step
 rewrites* on the terms of the signature.
 The rewrite rules describe a relation $\rewrite \subset \terms\times \terms$.
-The sentences that $\mathcal R$ proves is obtained from the finite application of the following
+The sentences that $\mathcal R$ proves are obtained from the finite application of the following
 rules:
 
 -   **Reflexitivity:** For each term $t \in \terms(X)$,
@@ -248,90 +186,91 @@ rules:
 
 If $x \rewrites y$, we say "$x$ rewrites to $y$". 
 
-<!--
-
-    -   What is Rewriting Logic
-        -   Models are Kripke structures
-    -   Reflection & Meta Level
-        -   Formal Tools are actually written in the Meta Level
-            -   CRC, termination tool, real time tool ...
-            -   Rules can be non-determintistic, tools to explore state space, strategies
-    -   Decision Procedures we have
-        -   Variant Satisfiability
-        -   Congruence Closures
-        -   CVC4
-
--->
-
-Models of rewrite theories are Kripke structure. Kripke structures are
-
-
-[20 years of rewriting]
+For a more in-depth look at rewriting logic, see [@twentyears].
 
 Maude
 -----
 
-The programing language, Maude, is based on rewriting logic.
+The programming language, Maude, is based on rewriting logic.
 A program in Maude is a rewrite theory, and a computation is a deduction based
-on the inference rules above.
+on the inference rules above. A basic introduction to Maude follows. For a more
+thorough guide see [@maudemanual].
 
 An equational theory is specified as a _functional modules_:
 
 ```
 fmod Z5 is
-    sorts NzZ5 Z5 .
-    subsorts NzZ5 < Z5 .
+    protecting BOOL .
 
-    op 0 : -> Z5                        [ctor] .
-    op 1 : -> NzZ5                      [ctor] .
-     
-    op _ + _ : Z5 Z5 -> Z5   [assoc comm id: 0] .
-    op   - _ : Z5    -> Z5 .
+    sorts Z5 .
+    op 0 : -> Z5                              [ctor] .
+    op 1 : -> Z5                              [ctor] .
+    op _ + _ : Z5 Z5 -> Z5   [assoc comm id: 0 ctor] .
+    op _ * _ : Z5 Z5 -> Z5   [assoc comm id: 1     ] .
 
     vars x y : Z5 .
 
-    eq -(x) + -(x) = 0 .
-    eq -(x  + y)   = -(z) + -(y) .
+    --- Characteristic 5
+    eq 1 + 1 + 1 + 1 + 1 = 0     .
+
+    --- Define multiplication in terms of repeated multiplication
+    eq x * 0 = 0                 .
+    eq x * (1 + y) = x + (x * y) .
 endfm
 ```
 
-This program represents an equational theory
-$E = ((S, \le_S), \Sigma, E \union B)$. Here, $S = \{$`NzZ5`$,$
-`Z5`$\}$, $\le_s = \{ ($ `NzZ5`$,$ `Z5` $\}$ and
-$\Sigma = \{ 0, 1, \_ + \_ , - \_ \}$.
-Although ordinarily equations in equational theories are symetric -- in a proof
-we may replace equals with equals if  a term matches either the left hand side
-or the right hand side -- equations in maude only apply from left to right.
+This program represents an equational theory $E = ((S, \le_S), \Sigma, E \union B)$. Here,
+$S = \braces{\tt Z5}\, \le_s = \braces{{\tt NzZ5}, {\tt Z5}}$ and
+$\Sigma = \braces{ {\tt 0}, {\tt 1}, {\tt \_ + \_}}$.
+The `fmod Z5 is ... endfm` construct defines a *functional module* and describes an equational
+theory. The signature of this theory has a single sort `Z5` The `op` declaration defines the
+terms and functions in the signature of that theory. These are of the form
+`op NAME : ARGUMENTS -> RESULT [ATTRIBUTES]`. For example, `_ + _` takes two terms of sort `Z5` and
+returns another of the same sort, while `0` and `1` are constants of sort `Z5`. The `ctor` attribute
+marks a term as part of the constructor signature of the theory. The `assoc`, `comm` and `id: 0`
+attributes mark the plus operator as being associative, commutative and having `0` as its identity.
+The `vars` declaration allows using the tokens `x` and `y` as variables in equations. Each `eq`
+construct represents an axiom in the equational theory.
 
-This is to allow terminating execution. Some equations may also be
-specified implicitly as atrributes as associativity (`assoc`),
-commutativity (`comm`) and identity (`id: 0`) are specified above.
-Besides being convenient, it also allows specification of equations that would
-otherwise make execution non-terminating and make execution more efficient.
+The `protecting BOOL` declaration includes the `BOOL` equational theory as a subtheory. Programmers
+must be careful not to alter the semantics of protected theories, e.g. by adding an equation
+`eq true = false .`
 
-This set of attributes $E$, along with equations $B$ specified with the
-`eq` keyword together make up the equations $E \union B$ that are used
-to define an equational theory.
+Although ordinarily equations in equational theories are symmetric -- in a proof we may replace
+equals by equals if a term matches either the left hand side or the right hand side -- equations in
+Maude are only applied from left to right. This is to allow defining a terminating execution.
+Attributes like `assoc` and `comm` allow specifying common axioms that would be difficult to define
+in a non-terminating way (and also make implementation of Maude's matching and unification
+algorithms easier and more efficient.) Because of this directionality, the theories must be
+*confluent* for them to form a well-defined equational theory. i.e. the application of equations must yield
+the same final result irrespective of the order in which they are applied. Although tools such as
+the Church-Rosser Checker and the Maude Termination Tool are provided, the burden of defining
+confluent and terminating functional modules is ultimately on the programmer defining them. The
+orientation on the equations means that we will sometimes have to define equations that would
+otherwise be mathematically deducible.
 
-For the theory to be well defined, we require that these equations be:
-
-* Confluent
-* functions should respect sorts (preregular??)
-
-[XXX expand]
-
-Defining a program as above means that there is an extremely small
-representational distance between the programs and the mathematical
-logic we use to reason about them.
+Defining a program as above means that there is an extremely small representational distance between
+the programs and the mathematical logic we use to reason about them.
 
 ### Maude Meta Level
 
-Rewriting logic is a *reflective logic* -- its meta theory can be
-represented at the object level in a consistant way. i.e. there is a
-function $\overline { ( \_ \proves \_ ) }$ such that for any theory $T$,
+Rewriting logic is a *reflective logic* -- its meta theory can be represented at the object level in
+a consistent way. i.e. there is a *universal theory* $U$ and a function
+$\overline { ( \_ \proves \_ ) }$ such that for any theory $T$,
 $T \proves \phi \iff U \proves \overline{ T \proves \phi }$.
 
-The module `META-LEVEL` is used to do this lifting. `META-LEVEL`'s
+In Maude, the built-in module `META-LEVEL` is used to do this lifting. Terms are represented in the
+sort `Term`, and modules in the sort `Module`. The function
+`upModule : ModuleExpression Bool -> Module` takes a `ModuleExpression`, a quote follows by the
+module name (e.g. `'Z5`) and returns a term representing the module. Similarly, the function
+`upTerm : Universal -> Term` takes a term of any sort and returns a meta-term of sort `Term`.
+Terms at the meta-level are represented using quoted identifiers. Arguments to terms are
+placed in a comma separated list within square brackets. Constants and variables have
+their sorts annoted as part of the identifier. For example the term `1 + 1` is represented
+at the meta level as `'_+_[ '1.Z5, '1.Z5 ]`, while the variable `X` as `'X:Z5`.
+Meta-terms can be reduced using the `metaReduce` function.
+
+`META-LEVEL`'s
 `upModule` function allows us to lift a theory and perform rewrites with
 it like any other term.
 
@@ -340,98 +279,56 @@ https://www.sciencedirect.com/science/article/pii/S1571066105825538
 
 ### Decision Procedures in Maude
 
-Some satisfiability procedures have been been implemented in Maude. We
-will use these solvers as the subsolvers for Nelson-Oppen.
+Some satisfiability procedures have been been implemented in Maude using the `META-LEVEL`. We will
+use these solvers as the subsolvers for Nelson-Oppen.
 
-#### Variant Satisfiability
+#### Variant-based Satisfiability
 
-Variant satisisfiability is an algorithm to decide quantifier free
-satisfiability of an initial algebra $T_{\Sigma/E}$ when the equational
-theory $(\Sigma, E)$ has the finite variant property and its constructors
-satitisfy a compactness condition.
+Variant-based satisfiability is a theory-generic procedure that applies to
+a large set of user-definable order-sorted signature. The equations of this
+theory must satisfy the *finite variant property* and may include axioms such as
+commutativity, associativity-commutativity or identity.
+Refer to [@varsat] for a more in-depth description.
 
-Decomposition of equational theory
-:  XXX
+Let $T = (\Sigma, E \union B)$ where the equations $E$ are confluent, terminating and $B$-coherent
+modulo axioms. A $E,B-$variant of a term $t$ is a pair $(u, \theta)$ such that
+$u =_B (t\theta)!_{\vec E,B}$, where for any term $u$, $u!_{\vec E, B}$ denotes the fully simplified
+term obtained by exhaustive simplification with the oriented equations $\vec E$ modulo $B$. Given
+variants $(u, \theta)$ and $(v, \gamma)$ of $t$, $(u, \theta)$ is more general than $(v, \gamma)$
+iff there is a substitution $\rho$ such that:
 
-Variant
-:   Given a decomposition $\mathcal R = (\Sigma, E, R)$ of an OS equational theory
-    $(\Sigma, E)$ and a $\Sigma-$term t, a variant of $t$ is a pair $(u, \theta)$
-    such that:
-    
-    1. $u =_B (t\theta)!_{R,B}$
-    2. If $s \notin \vars(t)$ then $x\theta = x$, and
-    3. $\theta = \theta!_{R,B}$, that is, $x\theta = (x\theta)!_{R,B}$ for all
-       variables $x$.
-       
-Most General Variant
-:   Given variants $(u, \theta)$ and $(v, \gamma)$ of $t$, $(u, \theta)$ is
-    more general than $(v, \gamma)$ iff there is a substitution $\rho$ such
-    that:
-    
-    1. $\theta_\rho =+B \gamma$ and
-    2. $u\rho =_b v$
-    
-Finite Variant Property
-:   The decomposition $\mathcal R = (\Sigma, B, R)$ of $(\Sigma, E)$ has the
-    finite variant property iff for each $\Sigma-$term $t$ there is a finite
-    most general complete set of variants.
+1. $\theta\rho =_B \gamma$ and
+2. $u\rho =_B v$
 
-* Note on var-sat and countably infinite sorts
+A theory $T$ has the finite variant property (FVP) iff for each term $t$ there is a finite most
+general complete set of variants. If a theory $(\Sigma, E\union B)$ is FVP and $B$ has a finitary
+$B-$unification algorithm, then folding variant narrowing gives a finitary $E\union B$-unification
+algorithm [@XXX].
+
+Furthermore, if $(\Sigma, E \union B) \supseteq (\Omega, E_{\Omega} \union B_\Omega)$ is a subsignature of constructors and
+$(\Omega, E_{\Omega} \union B_\Omega)$ is OS-compact,
+then satisfiability of quantifier free formulae in this theory are decidable by variant-based
+satisfiablity. This has been implmented in Maude by Sherik and Meseguer[@metalevelvarsat]
+and will be used for demonstrating the order-sorted Nelson-Oppen combination method.
 
 #### CVC4
 
--   Sets (non-recursive) of Ints, Reals, etc
--   Algebraic data types (axioms list `comm, assoc` not allowed)
--   Linear real , subset of non-linear that can be converted to linear.
+CVC4 is an industry-standard automatic theorem prover for SMT problems that supports many theories
+including rational and integer linear arithmetic, array, bitvectors and a subset of non-linear
+arithmetic. Although CVC4 allows defining algebraic data types it does not allow these user-defined
+types to have equations over them. Thus its power can clearly be augmented by combination with
+variant-based satisfiability.
 
 Order Sorted Nelson Oppen as a rewrite theory
 =============================================
 
-<!--
-
-3.  Nelson Oppen as a rewrite theory
-    - Order sorted is nicer that many-sorted and unsorted, because we omit
-      arrangements where there are equalities that are obviously unsatisfaible
-      at the sort level.
-    -   Conditions
-        -   Stably Infinite
-            -   Required by General Nelson Oppen
-            -   Intuitively, it means that if a formula is satisfiable and we have a witness we can
-                either produce an infinite number of witness or an infinite number of
-                counter-examples, allowing us to satisfy any disequality in addition to that formula
-        -   Optimally intersectable
-    -   Working
-        -   Purification
-        -   Arrangements
-        -   Sketch of algorithm
-            -   Given any formula, we can convert it to DNF, Purify , converting it to a conj of
-                literals in one of the two formulae
-            -   If each set of pure conjunctions are satisfiable, there is some arrangement of
-                shared variables that is satisfiable then by optimal intersectability the entire
-                fomula is satisfiable.
-            -   For a large number of variables this is difficult, so we iteratively try more and
-                more equalities until we can add no more.
-                -   In case the theory is convex, we are done
-                -   Otherwise, if PHI $\implies$ DISJ, then we check each possible equality
-4.  Nelson oppen as rewrite theory (fits inside this above?)
-5.  Examples
-    -   Walk through Convex List + Int example in detail
-    -   Real Hereditarily Finite sets
-6.  Future direction
-    -   Expand to more than two theories
-    -   Optimize
-    -   Take advantage of constructor variants
-    -   Integrate with SAT solver
-
--->
-
 Conditions on the theories
 --------------------------
 
-For the Nelson Oppen method to be viable, the theories must meet some conditions.
+For the Nelson Oppen method to be viable, the order-sorted theories must meet the following conditions:
 
-2. They must be stably infinite
-3. They must be optimally intersecting.
+1.  They must be stably infinite
+2.  They must be optimally intersecting.
 
 Stably Infinite
 
@@ -443,15 +340,13 @@ Stably Infinite
     $T-$satisfiable formula $\phi \in \F$, is also satisfiable in a model
     $\mathcal B = (B, \__B) \in \model(T)$ such that $|B_{s_i}| \ge \chi_0, 1 \le i \le n$.
 
-    Intuitively, it means that if a formula is satisfiable and we have a witness we can either
-    produce an infinite number of witness or an infinite number of counter-examples, allowing us to
-    satisfy any disequality in addition to that formula
-
+    Intuitively, it means that we can always find models of both theories where the cardinalities
+    of sorts $s_1, \ldots, s_n$ agree.
 
 Notation: For sort $s$ and signature $\Sigma_i$, let $[s]_i$ denote it's
 connected component of sorts in $\Sigma_i$
 
-Optimally intersectable
+Optimally intersectable [@cs576]
 
 :   The order-sorted signatures $\Sigma_1$ and $\Sigma_2$ are optimally
     intersectable iff:
@@ -469,10 +364,6 @@ Optimally intersectable
             $[s]_i \subset [s]_j$ (resp.
             $[s_l]_i \subset [s_l]_j, 1 \le l \le n$).
 
-        XXX requirement that no common function and predicate symbols removed?
-        What guarantees that functions and predicates are the same when restricted
-        to the intersection?
-
     2.  **Intersection is a single component:** For every sort
         $s \in \SharedSorts$, we have
         $[s]_1 \intersect S_2 = [s]_2 \intersect [s]_1 = [s]_1\intersect [s]_2$
@@ -485,7 +376,7 @@ Optimally intersectable
 
         ii. **Intersection is the top sort of one component:**
             $[s_i]_1 \intersect [s_j]_2 = \{s_0\}$, where $s_0$ is the
-            top-sort of atleast one of the connected components.
+            top-sort of at least one of the connected components.
 
         iii. **Once component is subsumed in the other:**
 
@@ -495,14 +386,6 @@ Optimally intersectable
              c.  (downward closure):
                  $\forall s \in [s_l]_l, \forall s' \in [s_k]_k, s\le_l s' \implies s\in [s_k]_k$
 
-\begin{figure}
-$$\begin{aligned}
-\\ \\ \\ \\ \\ \\ \\
-\end{aligned}$$
-\caption{XXX: Diagrams of allowed component intersections}
-\end{figure}
-
-
 Overview
 --------
 
@@ -511,21 +394,24 @@ signatures $\Sigma_1$ and $\Sigma_2$ each with decision procedures for quantifie
 $T_i$-satisfiability we want to derive a decision procedure for quantifier free $T_1 \union T_2$
 satisfiability.
 
-We can transform any formula $\phi$ into an *equi-satisfiable* formula in disjunctive normal form.
-Furthur, for each atom in such a formula we can apply "purification" to obtain a formula with each
-atom in the signature of one of the theories.
+We can transform any formula $\phi$ into an *equisatisfiable* formula in disjunctive normal form.
+Further, for each atom in such a formula we can apply "purification" to obtain a formula where each
+atom is in the signature of one of the two theories.
 
-Now, our task has become to find a model $M_0$ and an assigment $a: \vars(\phi) \to M_0$ such that
-$M_0, a \models \purified$. In general, this requires knowing thde semantics of each of the
-theories, but in the case of stably infinite theories, the task is easier. With stably infiniteness,
-since every satisfiable formula has an infinite model, if we need a value distinct from a witness we
-have infinite choices for either the value or the witness. i.e.
-$$T_1 \union T_2 \not\models \phi \land \vec t_k \ne \vec t'_k 
-\iff T_i \models \phi \limplies \vec t_k = \vec t'_k$$
-This means that we do not need to find a specific arrangement, but just a satisfiable equivalence
-relation of the shared variables. For any formula, $\purified$, we have an equisatisfiable formula
-$\arrangements$. Since for stably infinite theories we only care about the equivalence class being
-satisfiable, we can project this formula onto each of the theories and check satisfiability.
+Now, our task has become to find a model $M_0$ and an assignment $a: \vars(\phi) \to M_0$ such that
+$M_0, a \models \purified$, where $\Sigma_0$ is the intersection of the two signatures. In general,
+this requires knowing the semantics of each of the theories, but in the case of stably infinite
+theories, the task is easier. With stable infiniteness, since every satisfiable formula has an
+infinite model, if we need a value distinct from a witness we have infinite choices for either the
+value or the witness. i.e. $$T_1 \union T_2 \not\models \phi \land \vec t_k \ne \vec t'_k 
+\iff T_i \models \phi \limplies \vec t_k = \vec t'_k$$ This means that we do not need to find a
+specific arrangement, but just a satisfiable equivalence relation of the shared variables. For any
+formula, $\purified$, we have an equisatisfiable formula
+$\Or_{equiv\in \Equiv(\SharedVariables)}\{ \purified \land \phi_{\equiv}\}$, where
+$\Equiv(\SharedVariables)$ is the set of partitions on the shared variables $\SharedVariables$ and
+$\phi_\equiv$ is the formula defining this equivalence relation. Since for stably infinite theories
+we only care about the equivalence class being satisfiable, we can project this formula onto each of
+the theories and check satisfiability.
 
 \begin{figure}
 $$\begin{matrix*}[l]
@@ -543,61 +429,83 @@ Inference rules for Order-Sorted Nelson-Oppen
 ---------------------------------------------
 
 Note that up to this point, we have only found a mathematically sound way of finding satisfiability
-but do not yet have a viable efficient algorithm.
-Checking each equivalence class for satisfiability is infeasable (for 12 variables there as as many
-as xxx), even in the order sorted case where we can restrict ourselves to equivalences capatable
-with the sort structure.
+but do not yet have a viable efficient algorithm. Checking each equivalence class for satisfiability
+is infeasable as the number of equivalence classes grows exponentially with the number of variables,
+even in the order sorted case where we can restrict ourselves to equivalences capatable with the
+sort structure.
 
-Instead we choose a darwainian approach, pruning classes of equivalences from the search space if
+Instead we choose a Darwinian approach, pruning classes of equivalences from the search space if
 an identification of a single pair of variables implied by one theory is not satisfiable in another.
 For the non-convex case, if any theory implies the disjunction of all remaining identifications
-we branch our search, checking if atleast one of the remaining identifications is satisfiable.
+we branch our search, checking if at least one of the remaining identifications is satisfiable.
 
-$$\infer[\text{Equality Propagation}]
-  { \begin{matrix*}[l]
-          & \CheckSat(\phi_j \land \phi_E \land x_m = x_n) \\
-    \land & \NelsonOppenSat(\phi_1 \land \phi_2 \land \phi_E, \CandidateEqualities \setminus \{x_m = x_n\})
-    \end{matrix*}
-  }
-  { x_m = x_n \in \CandidateEqualities
-  & T_i \models \phi_i \and \phi_E \implies x_m = x_n
-  & \NelsonOppenSat(\phi_1 \land \phi_2 \land \phi_E, \CandidateEqualities)
-  }
-$$
+We can think of each step of the algorithm as splitting the search space into subsets where
+a single additional identification holds. If only a single identification is implied equality propagation
+causes the algorithm to decend into it. Otherwise, the split rule checks the satisfiability of each of the sets
+in the split subspaces, and decends into each satisfiable one.
 
-$$\infer[\text{Split}]
-  {\Or_{x_m = x_n \in \CandidateEqualities}
-   \left(\begin{matrix*}[l]
-        &      &\CheckSat(\phi_1 \land \phi_E \land x_m = x_n) \\
-        &\land & \CheckSat(\phi_2 \land \phi_E \land x_m = x_n) \\
-        &\land & \NelsonOppenSat(\phi_1 \land \phi_2 \land \phi_E, \CandidateEqualities \setminus \{x_m = x_n\})
-   \end{matrix*}\right)
-  }
-  { 
-  & T_i \models \phi_i \and \phi_E \implies \And \CandidateEqualities
-  & \NelsonOppenSat(\phi_1 \land \phi_2 \land \phi_E, \CandidateEqualities)
-  }
-$$
+### Order-Sorted Nelson-Oppen as a Rewrite Theory
 
 \input{algorithm.tex}
 
 Examples
 ========
 
-* List + Rat example
+Uninterpreted functions
+-----------------------
+
+\input{uninterp.tex}
+
+Combining Lists with Integers
+-----------------------------
+
+\input{list-nat.tex}
 
 Hereditarily Finite Sets parameterized over rationals
 -----------------------------------------------------
 
 \input{hfs.tex}
 
-https://ac.els-cdn.com/S0167642317301788/1-s2.0-S0167642317301788-main.pdf?_tid=9fa3ca91-7528-400b-ab94-8a2efd43b4fc&acdnat=1523049049_18ce07f410687584e04ea942f15cafb7
-7.5 21
+<!--
+Matrices
+--------
+
+\input{matrix.tex}
+-->
 
 Conclusion & Future work
 ========================
 
--   Keeping track of variant ctors
--   Integrating with SAT solver - Boolean struture
--   Shiney and Polite theories
-    - bit vectors
+The examples above have demonstrated the usefulness of Nelson-Oppen combination in Maude. Even so,
+the tool is still a prototype. There are several avenues that need to be explored before fully
+exploiting its potential. An obvious generalization is to handle combinations of more than two
+theories. One obvious and simple generalization to make is to have the module take more than two
+theories. Another is to accept a wider variaty of theories. 
+
+Stable infiniteness requires that the theory has infinite models. However, there are several
+important theories that are not stably infinite. For example, the theory of bit vectors
+($\Z / 2^n\Z$) can be used to model "machine integers" widely used in many programming languages. In
+[shiny], Tinelli and Zarba showed that this requirement can be reduced to the case where all but one
+of the theories is "shiny". Further work by Ranise, Ringeissen and Zarba[@polite], and by Jovanovi
+and Barrett[@politerevisited] provided an easier to compute alternative called strongly "polite"
+theories. Extending this implementation to handle these cases would greatly expand the usefulness of
+these theories.
+
+Being a prototype, little effort has been spent on optimization. For example, when working with the
+`var-sat` solver, the list of most general unifiers is computed repeatedly at every at every query
+to the solver. Computing this list can be expensive depending on the term and theory under
+consideration. For example, in an extreme case the term
+`{ X:Magma, Y:Magma, Z:Magma } C= { X:Magma }` took tens of minutes to compute.
+
+Another possible optimization is to take advantage of the propositional structure of the formula
+through combination with a boolean SAT solver. The DPLL is an algorithm for deciding the
+satisfiablilty of propositional logic formulae and forms the basis of most modern efficient solver
+[@krstic2007architecting].
+
+In general, one can envision incrementally building up towards a flexible, efficient and powerful
+SMT infrastructure in Maude delegating both to external solvers as well as tools leveraging the
+power and expressiveness of rewriting logic.
+
+References
+==========
+
